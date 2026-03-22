@@ -9,6 +9,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -39,7 +41,6 @@ public class UserService {
         user.setGithubUsername(request.getGithubUsername());
         user.setRole(User.Role.USER);
         userRepository.save(user);
-
         String token = jwtUtil.generateToken(user.getEmail());
         return new AuthDTOs.AuthResponse(token, user.getName(), user.getEmail(),
                 user.getDepartment(), user.getLeetcodeUsername(), user.getGithubUsername());
@@ -58,6 +59,15 @@ public class UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found: " + email));
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found: " + id));
+    }
+
+    public List<User> searchUsers(String query) {
+        return userRepository.searchByNameOrDepartment(query);
     }
 
     public User updateProfile(String email, AuthDTOs.RegisterRequest request) {
